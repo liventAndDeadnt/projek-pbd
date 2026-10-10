@@ -7,7 +7,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"projek_pbd_go/internal/platform/httpx"
+	"projek-pbd/internal/platform/httpx"
 )
 
 type BarangHandler struct {

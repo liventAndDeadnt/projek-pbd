@@ -7,7 +7,7 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"projek_pbd_go/internal/platform/apperr"
+	"projek-pbd/internal/platform/apperr"
 )
 
 type UserRepository struct {

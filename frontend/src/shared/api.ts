@@ -8,7 +8,7 @@ export class ApiError extends Error {
   }
 }
 
-// Bentuk response backend: { success, data } atau { success: false, message }
+// Bentuk response sistem: { success, data } atau { success: false, message }
 type Envelope<T> = { success: boolean; data?: T; message?: string }
 
 export async function api<T>(path: string, init: RequestInit = {}): Promise<T> {

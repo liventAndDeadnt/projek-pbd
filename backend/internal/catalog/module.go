@@ -8,8 +8,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 
-	"projek_pbd_go/internal/platform/auth"
-	"projek_pbd_go/internal/platform/middleware"
+	"projek-pbd/internal/platform/auth"
+	"projek-pbd/internal/platform/middleware"
 )
 
 // Register merakit dependensi modul dan mendaftarkan route.
@@ -33,4 +33,9 @@ func Register(rg *gin.RouterGroup, db *sqlx.DB) {
 	b.POST("", adminOnly, barang.Create)
 	b.PUT("/:id", adminOnly, barang.Update)
 	b.DELETE("/:id", adminOnly, barang.Delete)
+
+	vendor := NewVendorHandler(NewVendorService(NewVendorRepository(db)))
+	v := rg.Group("/vendor")
+	v.GET("", vendor.List)
+	v.GET("/:id", vendor.Get)
 }

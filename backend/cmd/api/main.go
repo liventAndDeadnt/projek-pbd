@@ -13,12 +13,12 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
 
-	"projek_pbd_go/internal/catalog"
-	"projek_pbd_go/internal/identity"
-	"projek_pbd_go/internal/platform/auth"
-	"projek_pbd_go/internal/platform/config"
-	"projek_pbd_go/internal/platform/database"
-	"projek_pbd_go/internal/platform/middleware"
+	"projek-pbd/internal/catalog"
+	"projek-pbd/internal/identity"
+	"projek-pbd/internal/platform/auth"
+	"projek-pbd/internal/platform/config"
+	"projek-pbd/internal/platform/database"
+	"projek-pbd/internal/platform/middleware"
 )
 
 func main() {

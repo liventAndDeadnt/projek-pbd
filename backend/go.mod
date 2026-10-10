@@ -1,4 +1,4 @@
-module projek_pbd_go
+module projek-pbd
 
 go 1.25.0
 

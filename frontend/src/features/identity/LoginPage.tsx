@@ -1,23 +1,12 @@
-import { useState, type CSSProperties, type FormEvent } from 'react'
-import { Navigate, useLocation } from 'react-router-dom'
+import { useState, type FormEvent } from 'react'
+import { Navigate } from 'react-router-dom'
 import { ApiError } from '../../shared/api'
 import { useAuth } from './useAuth'
+import { isRole, ROLE_HOME } from '../dashboard/roles'
 import './login.css'
 
-// Contoh isi kartu stok. Dekoratif: menunjukkan apa yang dicatat sistem ini.
-const LEDGER = [
-  { tgl: '1 Okt', ket: 'Penerimaan dari vendor', masuk: 120, keluar: null, stok: 120 },
-  { tgl: '2 Okt', ket: 'Penjualan', masuk: null, keluar: 8, stok: 112 },
-  { tgl: '3 Okt', ket: 'Penjualan', masuk: null, keluar: 15, stok: 97 },
-  { tgl: '5 Okt', ket: 'Retur ke vendor', masuk: null, keluar: 6, stok: 91 },
-  { tgl: '6 Okt', ket: 'Penerimaan dari vendor', masuk: 60, keluar: null, stok: 151 },
-  { tgl: '7 Okt', ket: 'Penjualan', masuk: null, keluar: 22, stok: 129 },
-] as const
-
 export default function LoginPage() {
-  const { user, loading, login } = useAuth()
-  const location = useLocation()
-  const from = (location.state as { from?: string } | null)?.from ?? '/'
+  const { user, loading, login, logout } = useAuth()
 
   const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
@@ -25,8 +14,12 @@ export default function LoginPage() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState<string | null>(null)
 
-  // Sudah login (atau baru saja berhasil login): langsung ke halaman tujuan.
-  if (!loading && user) return <Navigate to={from} replace />
+  // Pengguna yang sudah login diarahkan ke dashboard sesuai role dari /auth/me.
+  if (!loading && user && isRole(user.role)) return <Navigate to={ROLE_HOME[user.role]} replace />
+
+  if (!loading && user) {
+    return <div className="screen-center"><div className="role-error"><strong>Role akun belum dikenali.</strong><p>Hubungi administrator untuk memeriksa akses akun ini.</p><button type="button" onClick={() => void logout()}>Keluar</button></div></div>
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault()
@@ -45,46 +38,11 @@ export default function LoginPage() {
 
   return (
     <div className="login">
-      <aside className="ledger">
-        <p className="brand">Inventori PBD</p>
-
-        <div className="ledger-sheet">
-          <div aria-hidden="true">
-            <h2>Kartu stok</h2>
-            <p className="ledger-item">Kabel LAN 5 m, satuan pcs</p>
-            <table className="ledger-table">
-              <thead>
-                <tr>
-                  <th>Tanggal</th>
-                  <th>Keterangan</th>
-                  <th className="num">Masuk</th>
-                  <th className="num">Keluar</th>
-                  <th className="num">Stok</th>
-                </tr>
-              </thead>
-              <tbody>
-                {LEDGER.map((row, i) => (
-                  <tr key={row.tgl + row.ket} style={{ '--i': i } as CSSProperties}>
-                    <td>{row.tgl}</td>
-                    <td>{row.ket}</td>
-                    <td className="num">{row.masuk ?? '–'}</td>
-                    <td className="num">{row.keluar ?? '–'}</td>
-                    <td className="num balance">{row.stok}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-          <p className="ledger-note">
-            Setiap penerimaan, penjualan, dan retur tercatat otomatis di kartu stok.
-          </p>
-        </div>
-      </aside>
-
-      <main className="panel">
-        <form className="panel-inner" onSubmit={handleSubmit} noValidate>
-          <h1>Masuk ke sistem</h1>
-          <p className="lead">Pakai akun yang diberikan admin.</p>
+      <main className="login-card-wrap">
+        <form className="login-card" onSubmit={handleSubmit} noValidate>
+          <div className="login-brand"><span className="login-brand-mark" aria-hidden="true">I</span><span>Inventori GOstore</span></div>
+          <h1>Selamat datang</h1>
+          <p className="lead">Masuk dengan akun yang diberikan admin.</p>
 
           {error && (
             <p className="form-error" id="login-error" role="alert">

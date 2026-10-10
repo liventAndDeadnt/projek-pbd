@@ -9,7 +9,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"projek_pbd_go/internal/platform/apperr"
+	"projek-pbd/internal/platform/apperr"
 )
 
 func OK(c *gin.Context, data any) {

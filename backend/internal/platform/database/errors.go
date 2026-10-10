@@ -6,7 +6,7 @@ import (
 
 	"github.com/go-sql-driver/mysql"
 
-	"projek_pbd_go/internal/platform/apperr"
+	"projek-pbd/internal/platform/apperr"
 )
 
 const (

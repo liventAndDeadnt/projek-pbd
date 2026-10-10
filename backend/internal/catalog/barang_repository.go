@@ -8,8 +8,8 @@ import (
 
 	"github.com/jmoiron/sqlx"
 
-	"projek_pbd_go/internal/platform/apperr"
-	"projek_pbd_go/internal/platform/database"
+	"projek-pbd/internal/platform/apperr"
+	"projek-pbd/internal/platform/database"
 )
 
 const selectBarangView = `

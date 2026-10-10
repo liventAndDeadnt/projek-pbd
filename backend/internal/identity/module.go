@@ -4,7 +4,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/jmoiron/sqlx"
 
-	"projek_pbd_go/internal/platform/auth"
+	"projek-pbd/internal/platform/auth"
 )
 
 // Register mendaftarkan route auth. public = tanpa login, protected = wajib login.

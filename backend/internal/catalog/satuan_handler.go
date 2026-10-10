@@ -5,7 +5,7 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"projek_pbd_go/internal/platform/httpx"
+	"projek-pbd/internal/platform/httpx"
 )
 
 // SatuanHandler: lapisan HTTP saja (bind, validasi, response). Tidak ada SQL di sini.

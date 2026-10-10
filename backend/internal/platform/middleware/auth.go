@@ -5,9 +5,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
-	"projek_pbd_go/internal/platform/apperr"
-	"projek_pbd_go/internal/platform/auth"
-	"projek_pbd_go/internal/platform/httpx"
+	"projek-pbd/internal/platform/apperr"
+	"projek-pbd/internal/platform/auth"
+	"projek-pbd/internal/platform/httpx"
 )
 
 const claimsKey = "auth.claims"
