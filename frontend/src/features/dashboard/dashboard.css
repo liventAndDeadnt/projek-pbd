@@ -1,0 +1,53 @@
+.shell-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 1rem clamp(1rem, 4vw, 2.5rem);
+  color: var(--paper);
+  background: var(--ink);
+}
+
+.shell-user {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.shell-role {
+  margin-left: 0.35rem;
+  padding: 0.1rem 0.5rem;
+  font-size: 0.875rem;
+  color: var(--ink);
+  background: var(--signal);
+  border-radius: 2px;
+}
+
+.shell-logout {
+  padding: 0.4rem 0.9rem;
+  font: 600 0.95rem var(--font-body);
+  color: var(--paper);
+  background: none;
+  border: 1px solid var(--ink-muted);
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.shell-logout:focus-visible {
+  outline: 3px solid var(--signal);
+  outline-offset: 2px;
+}
+
+.shell-logout:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.shell-main {
+  padding: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+.shell-main h1 {
+  margin: 0 0 0.5rem;
+  font: 700 2.5rem / 1 var(--font-condensed);
+}

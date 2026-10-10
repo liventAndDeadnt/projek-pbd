@@ -1,0 +1,2 @@
+-- Function MySQL. Contoh yang direncanakan: fn_stok_terkini(p_idbarang)
+-- DELIMITER $$ ... $$ DELIMITER ;

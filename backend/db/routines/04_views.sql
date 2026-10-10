@@ -1,0 +1,1 @@
+-- View (setelah UTS). Rencana: v_laporan_stok, v_riwayat_penjualan

@@ -1,0 +1,223 @@
+.login {
+  min-height: 100dvh;
+  display: grid;
+  grid-template-columns: minmax(0, 1.25fr) minmax(22rem, 0.75fr);
+}
+
+/* ---------- kiri: kartu stok ---------- */
+.ledger {
+  padding: clamp(1.5rem, 4vw, 3.5rem);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 2.5rem;
+}
+
+.ledger-sheet {
+  max-width: 40rem;
+}
+
+.ledger-sheet h2 {
+  margin: 0;
+  font: 700 clamp(2.75rem, 6vw, 4.5rem) / 0.95 var(--font-condensed);
+}
+
+.ledger-item {
+  margin: 0.5rem 0 1.75rem;
+  color: var(--paper-muted);
+}
+
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-variant-numeric: tabular-nums;
+}
+
+.ledger-table th,
+.ledger-table td {
+  padding: 0.6rem 0.75rem;
+  text-align: left;
+  border-left: 1px solid var(--ledger-rule);
+  border-bottom: 1px solid var(--ledger-rule);
+}
+
+.ledger-table th:first-child,
+.ledger-table td:first-child {
+  border-left: 0;
+  padding-left: 0;
+}
+
+.ledger-table th {
+  font-weight: 600;
+  border-bottom: 2px solid var(--ink);
+}
+
+.ledger-table .num {
+  text-align: right;
+}
+
+.ledger-table .balance {
+  font-weight: 600;
+}
+
+/* satu momen animasi: baris kartu stok "tertulis" berurutan saat halaman dibuka */
+.ledger-table tbody tr {
+  animation: write-in 0.4s ease-out both;
+  animation-delay: calc(var(--i) * 120ms + 200ms);
+}
+
+@keyframes write-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.ledger-note {
+  max-width: 32rem;
+  margin: 1.5rem 0 0;
+  color: var(--paper-muted);
+}
+
+/* ---------- kanan: form ---------- */
+.panel {
+  display: flex;
+  align-items: center;
+  padding: clamp(1.5rem, 5vw, 3.5rem);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.panel-inner {
+  width: 100%;
+  max-width: 22rem;
+}
+
+.panel h1 {
+  margin: 0 0 0.5rem;
+  font: 700 2.25rem / 1.05 var(--font-condensed);
+}
+
+.lead {
+  margin: 0 0 2rem;
+  color: var(--ink-muted);
+}
+
+.form-error {
+  margin: 0 0 1.5rem;
+  padding: 0.7rem 0.85rem;
+  border-left: 4px solid var(--danger-on-ink);
+  background: rgb(255 180 168 / 0.12);
+  color: #ffd9d3;
+}
+
+.field {
+  margin-bottom: 1.25rem;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 0.4rem;
+  font-weight: 600;
+}
+
+.input-row {
+  position: relative;
+}
+
+.input {
+  width: 100%;
+  padding: 0.75rem 0.85rem;
+  font: inherit;
+  color: var(--ink);
+  background: var(--paper);
+  border: 2px solid transparent;
+  border-radius: 2px;
+}
+
+.input--toggle {
+  padding-right: 6.5rem;
+}
+
+.input[aria-invalid='true'] {
+  border-color: var(--danger-on-ink);
+}
+
+.input:focus-visible {
+  outline: 3px solid var(--signal);
+  outline-offset: 2px;
+}
+
+.toggle {
+  position: absolute;
+  top: 50%;
+  right: 0.4rem;
+  transform: translateY(-50%);
+  padding: 0.35rem 0.5rem;
+  font: 600 0.875rem var(--font-body);
+  color: var(--ink);
+  text-decoration: underline;
+  background: none;
+  border: 0;
+  cursor: pointer;
+}
+
+.toggle:focus-visible {
+  outline: 2px solid var(--ink);
+}
+
+.submit {
+  width: 100%;
+  margin-top: 0.5rem;
+  padding: 0.8rem 1rem;
+  font: 700 1.2rem var(--font-condensed);
+  letter-spacing: 0.02em;
+  color: var(--ink);
+  background: var(--signal);
+  border: 0;
+  border-radius: 2px;
+  cursor: pointer;
+}
+
+.submit:focus-visible {
+  outline: 3px solid var(--paper);
+  outline-offset: 3px;
+}
+
+.submit:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+/* ---------- layar sempit: kartu stok jadi pita ringkas di atas form ---------- */
+@media (max-width: 860px) {
+  .login {
+    grid-template-columns: 1fr;
+  }
+
+  .ledger {
+    gap: 1.5rem;
+    padding-bottom: 2rem;
+  }
+
+  .ledger-table tbody tr:nth-child(n + 5),
+  .ledger-note {
+    display: none;
+  }
+
+  .ledger-sheet h2 {
+    font-size: 2.5rem;
+  }
+
+  .panel {
+    align-items: flex-start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .ledger-table tbody tr {
+    animation: none;
+  }
+}

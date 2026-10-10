@@ -1,0 +1,17 @@
+# secrets
+.env
+
+# go
+*.exe
+.gocache/
+backend/web/dist/*
+!backend/web/dist/.gitkeep
+
+# node
+node_modules/
+frontend/dist/
+
+# editor / os
+.vscode/
+.idea/
+.DS_Store

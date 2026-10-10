@@ -1,0 +1,36 @@
+// Package catalog: modul master data barang & satuan.
+//
+// Pola tiap entity: model -> repository (SQL) -> service (aturan bisnis) -> handler (HTTP).
+// Modul lain hanya boleh memakai service milik modul ini, bukan repository-nya.
+package catalog
+
+import (
+	"github.com/gin-gonic/gin"
+	"github.com/jmoiron/sqlx"
+
+	"projek_pbd_go/internal/platform/auth"
+	"projek_pbd_go/internal/platform/middleware"
+)
+
+// Register merakit dependensi modul dan mendaftarkan route.
+// rg harus group yang sudah dipasangi middleware.Auth (semua route di sini wajib login).
+// Baca: semua role. Tulis: admin saja.
+func Register(rg *gin.RouterGroup, db *sqlx.DB) {
+	adminOnly := middleware.RequireRole(auth.RoleAdmin)
+
+	satuan := NewSatuanHandler(NewSatuanService(NewSatuanRepository(db)))
+	s := rg.Group("/satuan")
+	s.GET("", satuan.List)
+	s.GET("/:id", satuan.Get)
+	s.POST("", adminOnly, satuan.Create)
+	s.PUT("/:id", adminOnly, satuan.Update)
+	s.DELETE("/:id", adminOnly, satuan.Delete)
+
+	barang := NewBarangHandler(NewBarangService(NewBarangRepository(db)))
+	b := rg.Group("/barang")
+	b.GET("", barang.List)
+	b.GET("/:id", barang.Get)
+	b.POST("", adminOnly, barang.Create)
+	b.PUT("/:id", adminOnly, barang.Update)
+	b.DELETE("/:id", adminOnly, barang.Delete)
+}

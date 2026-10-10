@@ -1,0 +1,1 @@
+-- Trigger MySQL. Rencana: AFTER INSERT di detail_penerimaan / detail_penjualan / detail_retur -> kartu_stok

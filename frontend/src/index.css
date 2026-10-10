@@ -1,0 +1,41 @@
+:root {
+  --paper: #eef3f0;
+  --paper-muted: #52636f;
+  --ledger-rule: #b5c7bd;
+  --ink: #17263b;
+  --ink-muted: #a9b8c8;
+  --signal: #f2b705;
+  --danger-on-ink: #ffb4a8;
+
+  --font-body: 'Barlow', 'Segoe UI', system-ui, sans-serif;
+  --font-condensed: 'Barlow Condensed', 'Arial Narrow', 'Segoe UI', sans-serif;
+
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font: 400 1rem/1.5 var(--font-body);
+  color: var(--ink);
+  background: var(--paper);
+  -webkit-font-smoothing: antialiased;
+}
+
+.brand {
+  margin: 0;
+  font: 700 1.35rem/1 var(--font-condensed);
+  letter-spacing: 0.02em;
+}
+
+.screen-center {
+  min-height: 100dvh;
+  display: grid;
+  place-items: center;
+  color: var(--paper-muted);
+}
