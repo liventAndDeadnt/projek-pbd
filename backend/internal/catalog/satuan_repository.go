@@ -11,6 +11,9 @@ import (
 	"projek-pbd/internal/platform/database"
 )
 
+const selectSatuan = `
+SELECT * FROM v_satuan_detail`
+
 // SatuanRepository: satu-satunya tempat SQL untuk tabel satuan.
 type SatuanRepository struct {
 	db *sqlx.DB
@@ -21,16 +24,14 @@ func NewSatuanRepository(db *sqlx.DB) *SatuanRepository {
 }
 
 func (r *SatuanRepository) List(ctx context.Context) ([]Satuan, error) {
-	out := []Satuan{} // bukan nil, supaya JSON jadi [] bukan null
-	err := r.db.SelectContext(ctx, &out,
-		`SELECT idsatuan, nama_satuan, status FROM satuan ORDER BY idsatuan`)
+	out := []Satuan{}
+	err := r.db.SelectContext(ctx, &out, selectSatuan)
 	return out, err
 }
 
 func (r *SatuanRepository) GetByID(ctx context.Context, id int) (*Satuan, error) {
 	var s Satuan
-	err := r.db.GetContext(ctx, &s,
-		`SELECT idsatuan, nama_satuan, status FROM satuan WHERE idsatuan = ?`, id)
+	err := r.db.GetContext(ctx, &s, selectSatuan+" WHERE idsatuan = ?", id)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, apperr.ErrNotFound
 	}

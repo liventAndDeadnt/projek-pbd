@@ -7,6 +7,20 @@ type AuthUser struct {
 	Role     string `json:"role"`
 }
 
+// UserView adalah data aman untuk daftar pengguna (tanpa password).
+type UserView struct {
+	IDUser   int    `db:"iduser" json:"iduser"`
+	Username string `db:"username" json:"username"`
+	IDRole   int    `db:"idrole" json:"idrole"`
+	Role     string `db:"nama_role" json:"role"`
+}
+
+// UserFilter berisi filter opsional untuk daftar pengguna.
+type UserFilter struct {
+	Search string
+	Role   string
+}
+
 type LoginInput struct {
 	Username string `json:"username" binding:"required,max=45"`
 	Password string `json:"password" binding:"required,max=100"`

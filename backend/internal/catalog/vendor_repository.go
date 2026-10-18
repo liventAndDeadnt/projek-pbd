@@ -12,8 +12,7 @@ import (
 )
 
 const selectVendor = `
-SELECT idvendor, nama_vendor, badan_hukum, status
-FROM vendor`
+SELECT * FROM v_vendor_detail`
 
 // VendorRepository menjadi satu-satunya lapisan yang menjalankan SQL untuk vendor.
 type VendorRepository struct {

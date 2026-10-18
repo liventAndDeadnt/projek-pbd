@@ -5,6 +5,7 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"projek-pbd/internal/platform/auth"
+	"projek-pbd/internal/platform/middleware"
 )
 
 // Register mendaftarkan route auth. public = tanpa login, protected = wajib login.
@@ -16,5 +17,9 @@ func Register(public, protected *gin.RouterGroup, db *sqlx.DB, jwt *auth.Manager
 	public.POST("/auth/logout", h.Logout)
 	protected.GET("/auth/me", h.Me)
 
-	// TODO: CRUD user (admin only)
+	users := NewUserHandler(NewUserService(NewUserRepository(db)))
+	protected.GET("/users", middleware.RequireRole(auth.RoleAdmin), users.List)
+
+	roles := NewRoleHandler(NewRoleService(NewRoleRepository(db)))
+	protected.GET("/roles", middleware.RequireRole(auth.RoleAdmin), roles.List)
 }

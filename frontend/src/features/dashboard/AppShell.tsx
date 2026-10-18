@@ -12,7 +12,7 @@ export default function AppShell() {
   const location = useLocation()
   const role = user && isRole(user.role) ? user.role : null
 
-  const pageTitles: Record<string, string> = { dashboard: 'Dashboard', barang: 'Barang', satuan: 'Satuan', vendor: 'Vendor', pengguna: 'Pengguna', margin: 'Margin penjualan', pengadaan: 'Pengadaan', penerimaan: 'Penerimaan', retur: 'Retur', penjualan: 'Penjualan', 'kartu-stok': 'Kartu stok', stok: 'Stok', pos: 'POS', laporan: 'Laporan' }
+  const pageTitles: Record<string, string> = { dashboard: 'Dashboard', barang: 'Barang', satuan: 'Satuan', vendor: 'Vendor', pengguna: 'Pengguna', role: 'Role', margin: 'Margin penjualan', pengadaan: 'Pengadaan', penerimaan: 'Penerimaan', retur: 'Retur', penjualan: 'Penjualan', 'kartu-stok': 'Kartu stok', stok: 'Stok', pos: 'POS', laporan: 'Laporan' }
   const currentPath = location.pathname.split('/').filter(Boolean).at(-1) ?? 'dashboard'
   const breadcrumbTitle = currentPath === 'baru' ? location.pathname.startsWith('/retur') ? 'Buat retur' : location.pathname.startsWith('/penerimaan') ? 'Buat penerimaan' : 'Buat pengadaan' : pageTitles[currentPath] ?? currentPath
 

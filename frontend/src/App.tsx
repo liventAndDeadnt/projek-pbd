@@ -4,6 +4,9 @@ import DashboardPage from './features/dashboard/DashboardPage'
 import { ROLE_HOME, type Role } from './features/dashboard/roles'
 import CatalogPage from './features/catalog/CatalogPage'
 import VendorPage from './features/catalog/VendorPage'
+import UserPage from './features/catalog/UserPage'
+import MarginPage from './features/catalog/MarginPage'
+import RolePage from './features/identity/RolePage'
 import { InventoryPage } from './features/inventory/InventoryPages'
 import ReturnPage from './features/returns/ReturnPage'
 import { ReceivingDetailPage, ReceivingFormPage, ReceivingPage } from './features/inventory/ReceivingPage'
@@ -37,8 +40,9 @@ export default function App() {
         <Route path="/barang" element={<CatalogPage kind="barang" />} />
         <Route path="/satuan" element={<RequireAuth roles={['admin', 'purchasing', 'gudang']} />}><Route index element={<CatalogPage kind="satuan" />} /></Route>
         <Route path="/vendor" element={<RequireAuth roles={['admin', 'purchasing']} />}><Route index element={<VendorPage />} /></Route>
-        <Route path="/pengguna" element={<RequireAuth roles={['admin']} />}><Route index element={<ResourcePage resource="user" />} /></Route>
-        <Route path="/margin" element={<RequireAuth roles={['admin']} />}><Route index element={<ResourcePage resource="margin" />} /></Route>
+        <Route path="/pengguna" element={<RequireAuth roles={['admin']} />}><Route index element={<UserPage />} /></Route>
+        <Route path="/role" element={<RequireAuth roles={['admin']} />}><Route index element={<RolePage />} /></Route>
+        <Route path="/margin" element={<RequireAuth roles={['admin']} />}><Route index element={<MarginPage />} /></Route>
         <Route path="/pengadaan" element={<RequireAuth roles={['admin', 'purchasing', 'gudang']} />}><Route index element={<ProcurementPage />} /></Route>
         <Route path="/pengadaan/baru" element={<RequireAuth roles={['admin', 'purchasing']} />}><Route index element={<ProcurementFormPage />} /></Route>
         <Route path="/pengadaan/:id" element={<RequireAuth roles={['admin', 'purchasing', 'gudang']} />}><Route index element={<ProcurementDetailPage />} /></Route>

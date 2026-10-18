@@ -28,7 +28,7 @@ const vendor = { label: 'Vendor', to: '/vendor', icon: '◇' }
 export const ROLE_NAVIGATION: Record<Role, NavigationGroup[]> = {
   admin: [
     { items: [dashboard('admin')] },
-    { label: 'Master data', items: [barang, satuan, vendor, { label: 'Pengguna', to: '/pengguna', icon: '◎' }, { label: 'Margin penjualan', to: '/margin', icon: '%' }] },
+    { label: 'Master data', items: [barang, satuan, vendor, { label: 'Pengguna', to: '/pengguna', icon: '◎' }, { label: 'Role', to: '/role', icon: '◇' }, { label: 'Margin penjualan', to: '/margin', icon: '%' }] },
     { label: 'Transaksi', items: [{ label: 'Pengadaan', to: '/pengadaan', icon: '⇧' }, { label: 'Penerimaan', to: '/penerimaan', icon: '↧' }, { label: 'Retur', to: '/retur', icon: '↶' }, { label: 'Penjualan', to: '/penjualan', icon: '↗' }, { label: 'Kartu stok', to: '/kartu-stok', icon: '▤' }] },
     { label: 'Laporan', items: [{ label: 'Penjualan', to: '/laporan/penjualan', icon: '⌁' }, { label: 'Pengadaan', to: '/laporan/pengadaan', icon: '⌁' }, { label: 'Stok', to: '/laporan/stok', icon: '⌁' }, { label: 'Retur', to: '/laporan/retur', icon: '⌁' }, { label: 'Margin / profit', to: '/laporan/margin', icon: '⌁' }] },
   ],

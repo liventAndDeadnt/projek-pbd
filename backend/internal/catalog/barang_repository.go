@@ -13,9 +13,7 @@ import (
 )
 
 const selectBarangView = `
-SELECT b.idbarang, b.jenis, b.nama, b.idsatuan, b.status, b.harga, s.nama_satuan
-FROM barang b
-JOIN satuan s ON s.idsatuan = b.idsatuan`
+SELECT * FROM v_barang_detail`
 
 // BarangRepository: satu-satunya tempat SQL untuk tabel barang.
 type BarangRepository struct {
@@ -35,17 +33,17 @@ func (r *BarangRepository) List(ctx context.Context, f BarangFilter) ([]BarangVi
 	var args []any
 
 	if f.Search != "" {
-		conds = append(conds, "b.nama LIKE ?")
+		conds = append(conds, "nama LIKE ?")
 		args = append(args, "%"+f.Search+"%")
 	}
 	if f.Status != nil {
-		conds = append(conds, "b.status = ?")
+		conds = append(conds, "status = ?")
 		args = append(args, *f.Status)
 	}
 	if len(conds) > 0 {
 		query += " WHERE " + strings.Join(conds, " AND ")
 	}
-	query += " ORDER BY b.idbarang"
+	query += " ORDER BY idbarang"
 
 	out := []BarangView{} // bukan nil, supaya JSON jadi [] bukan null
 	if err := r.db.SelectContext(ctx, &out, query, args...); err != nil {
@@ -56,7 +54,7 @@ func (r *BarangRepository) List(ctx context.Context, f BarangFilter) ([]BarangVi
 
 func (r *BarangRepository) GetByID(ctx context.Context, id int) (*BarangView, error) {
 	var b BarangView
-	err := r.db.GetContext(ctx, &b, selectBarangView+" WHERE b.idbarang = ?", id)
+	err := r.db.GetContext(ctx, &b, selectBarangView+" WHERE idbarang = ?", id)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, apperr.ErrNotFound
 	}
