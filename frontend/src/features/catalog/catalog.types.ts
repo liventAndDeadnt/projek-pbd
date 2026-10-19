@@ -18,4 +18,4 @@ export type User = {
   iduser: number; username: string; idrole: number; role: string }
 
 export type MarginPenjualan = { 
-  idmargin_penjualan: number; created_at: string | null; persen: number | null; status: 0 | 1 | null; }
+  idmargin_penjualan: number; created_at: string | null; persen: number | null; status: 0 | 1 | null; username: string; }

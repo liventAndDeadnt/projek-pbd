@@ -11,7 +11,8 @@ import (
 )
 
 const selectMargin = `
-SELECT * FROM v_margin_detail`
+SELECT idmargin_penjualan, persen, status, created_at, username
+FROM v_margin_detail`
 
 type MarginRepository struct {
 	db *sqlx.DB
@@ -21,7 +22,7 @@ func NewMarginRepository(db *sqlx.DB) *MarginRepository {
 	return &MarginRepository{db: db}
 }
 
-func (r *MarginRepository) List(ctx context.Context, f MarginFilter) ([]Margin, error) {
+func (r *MarginRepository) List(ctx context.Context, f MarginFilter) ([]MarginView, error) {
 	query := selectMargin
 	var args []any
 	if f.Status != nil {
@@ -30,15 +31,15 @@ func (r *MarginRepository) List(ctx context.Context, f MarginFilter) ([]Margin, 
 	}
 	query += " ORDER BY idmargin_penjualan"
 
-	out := []Margin{}
+	out := []MarginView{}
 	if err := r.db.SelectContext(ctx, &out, query, args...); err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (r *MarginRepository) GetByID(ctx context.Context, id int) (*Margin, error) {
-	var margin Margin
+func (r *MarginRepository) GetByID(ctx context.Context, id int) (*MarginView, error) {
+	var margin MarginView
 	err := r.db.GetContext(ctx, &margin, selectMargin+" WHERE idmargin_penjualan = ?", id)
 	if errors.Is(err, sql.ErrNoRows) {
 		return nil, apperr.ErrNotFound

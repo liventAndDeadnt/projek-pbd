@@ -25,8 +25,6 @@ func NewBarangRepository(db *sqlx.DB) *BarangRepository {
 }
 
 // List menyusun WHERE hanya dari filter yang diisi. Pola "(? = ” OR kolom = ?)" sengaja dihindari
-// karena membuat optimizer MySQL sulit memakai index.
-// Catatan: LIKE '%kata%' (contains) tidak bisa memakai index nama; LIKE 'kata%' (prefix) bisa.
 func (r *BarangRepository) List(ctx context.Context, f BarangFilter) ([]BarangView, error) {
 	query := selectBarangView
 	var conds []string

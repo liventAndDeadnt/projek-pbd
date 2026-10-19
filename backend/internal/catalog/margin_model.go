@@ -12,3 +12,8 @@ type Margin struct {
 type MarginFilter struct {
 	Status *int
 }
+
+type MarginView struct {
+	Margin
+	Username string `db:"username" json:"username"`
+}
