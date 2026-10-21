@@ -30,7 +30,7 @@ export function Field({ label, required, hint, children }: { label: string; requ
   return <label className="form-field"><span>{label}{required && <em aria-hidden="true"> *</em>}</span>{children}{hint && <small>{hint}</small>}</label>
 }
 
-export function FormActions({ onCancel, submit = 'Simpan' }: { onCancel: () => void; submit?: string }) {
-  return <div className="form-actions"><button className="button button--secondary" type="button" onClick={onCancel}>Batal</button><button className="button button--primary" type="submit">{submit}</button></div>
+export function FormActions({ onCancel, submit = 'Simpan', disabled = false }: { onCancel: () => void; submit?: string; disabled?: boolean }) {
+  return <div className="form-actions"><button className="button button--secondary" type="button" disabled={disabled} onClick={onCancel}>Batal</button><button className="button button--primary" type="submit" disabled={disabled}>{submit}</button></div>
 }
 

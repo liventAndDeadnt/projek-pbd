@@ -17,9 +17,20 @@ func Register(public, protected *gin.RouterGroup, db *sqlx.DB, jwt *auth.Manager
 	public.POST("/auth/logout", h.Logout)
 	protected.GET("/auth/me", h.Me)
 
+	adminOnly := middleware.RequireRole(auth.RoleAdmin)
 	users := NewUserHandler(NewUserService(NewUserRepository(db)))
-	protected.GET("/users", middleware.RequireRole(auth.RoleAdmin), users.List)
+	u := protected.Group("/users")
+	u.GET("", adminOnly, users.List)
+	u.GET("/:id", adminOnly, users.Get)
+	u.POST("", adminOnly, users.Create)
+	u.PUT("/:id", adminOnly, users.Update)
+	u.DELETE("/:id", adminOnly, users.Delete)
 
 	roles := NewRoleHandler(NewRoleService(NewRoleRepository(db)))
-	protected.GET("/roles", middleware.RequireRole(auth.RoleAdmin), roles.List)
+	p := protected.Group("/roles")
+	p.GET("", adminOnly, roles.List)
+	p.GET("/:id", adminOnly, roles.Get)
+	p.POST("", adminOnly, roles.Create)
+	p.PUT("/:id", adminOnly, roles.Update)
+	p.DELETE("/:id", adminOnly, roles.Delete)
 }

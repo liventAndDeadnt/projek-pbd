@@ -2,6 +2,8 @@ package catalog
 
 import (
 	"net/http"
+	"strconv"
+	"strings"
 
 	"github.com/gin-gonic/gin"
 
@@ -18,7 +20,16 @@ func NewSatuanHandler(svc *SatuanService) *SatuanHandler {
 }
 
 func (h *SatuanHandler) List(c *gin.Context) {
-	data, err := h.svc.List(c.Request.Context())
+	f := SatuanFilter{Search: strings.TrimSpace(c.Query("search"))}
+	if raw := c.Query("status"); raw != "" {
+		status, err := strconv.Atoi(raw)
+		if err != nil || (status != 0 && status != 1) {
+			httpx.Fail(c, http.StatusBadRequest, "Status harus 0 atau 1.")
+			return
+		}
+		f.Status = &status
+	}
+	data, err := h.svc.List(c.Request.Context(), f)
 	if err != nil {
 		httpx.Error(c, err)
 		return

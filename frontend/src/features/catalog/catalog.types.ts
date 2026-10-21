@@ -8,14 +8,23 @@ export type Barang = {
   harga: number
 }
 
-export type Satuan = { 
-  idsatuan: number; nama_satuan: string; status: 0 | 1 }
+export type Satuan = {
+  idsatuan: number
+  nama_satuan: string
+  status: 0 | 1
+}
 
 export type Vendor = {
-  idvendor: number; nama_vendor: string; badan_hukum: string; status: string }
+  idvendor: number
+  nama_vendor: string
+  badan_hukum: 'Y' | 'N'
+  status: '0' | '1'
+}
 
-export type User = { 
-  iduser: number; username: string; idrole: number; role: string }
-
-export type MarginPenjualan = { 
-  idmargin_penjualan: number; created_at: string | null; persen: number | null; status: 0 | 1 | null; username: string; }
+export type MarginPenjualan = {
+  idmargin_penjualan: number
+  created_at: string | null
+  persen: number | null
+  status: 0 | 1 | null
+  username: string
+}

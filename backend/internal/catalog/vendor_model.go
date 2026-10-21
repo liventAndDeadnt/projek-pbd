@@ -14,3 +14,9 @@ type VendorFilter struct {
 	Search string
 	Status *string
 }
+
+type VendorInput struct {
+	NamaVendor string `json:"nama_vendor" binding:"required,max=100"`
+	BadanHukum string `json:"badan_hukum" binding:"required,oneof=Y N"`
+	Status     string `json:"status" binding:"required,oneof=0 1"`
+}

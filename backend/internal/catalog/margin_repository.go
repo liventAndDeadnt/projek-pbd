@@ -8,6 +8,7 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"projek-pbd/internal/platform/apperr"
+	"projek-pbd/internal/platform/database"
 )
 
 const selectMargin = `
@@ -48,4 +49,38 @@ func (r *MarginRepository) GetByID(ctx context.Context, id int) (*MarginView, er
 		return nil, err
 	}
 	return &margin, nil
+}
+
+func (r *MarginRepository) Create(ctx context.Context, m Margin) (int, error) {
+	res, err := r.db.NamedExecContext(ctx, `
+	INSERT INTO margin_penjualan (persen, status, iduser, created_at)
+	VALUES (:persen, :status, :iduser, CURRENT_TIMESTAMP)`, m)
+	if err != nil {
+		return 0, err
+	}
+	id, err := res.LastInsertId()
+	return int(id), err
+}
+
+func (r *MarginRepository) Update(ctx context.Context, m Margin) error {
+	res, err := r.db.NamedExecContext(ctx, `
+	UPDATE margin_penjualan
+	SET persen = :persen, status = :status, updated_at = CURRENT_TIMESTAMP
+	WHERE idmargin_penjualan = :idmargin_penjualan`, m)
+	if err != nil {
+		return err
+	}
+	return database.RequireAffected(res)
+}
+
+func (r *MarginRepository) Delete(ctx context.Context, id int) error {
+	res, err := r.db.ExecContext(ctx, `DELETE FROM margin_penjualan WHERE idmargin_penjualan = ?`, id)
+	if err != nil {
+		if database.IsFKRestrict(err) {
+			return apperr.Wrap(apperr.ErrConflict,
+				"Margin ini digunakan dalam penjualan dan tidak bisa dihapus.")
+		}
+		return err
+	}
+	return database.RequireAffected(res)
 }

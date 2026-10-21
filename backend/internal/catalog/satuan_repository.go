@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"errors"
+	"strings"
 
 	"github.com/jmoiron/sqlx"
 
@@ -23,9 +24,25 @@ func NewSatuanRepository(db *sqlx.DB) *SatuanRepository {
 	return &SatuanRepository{db: db}
 }
 
-func (r *SatuanRepository) List(ctx context.Context) ([]Satuan, error) {
+func (r *SatuanRepository) List(ctx context.Context, f SatuanFilter) ([]Satuan, error) {
+	query := selectSatuan
+	var conditions []string
+	var args []any
+	if f.Search != "" {
+		conditions = append(conditions, "nama_satuan LIKE ?")
+		args = append(args, "%"+f.Search+"%")
+	}
+	if f.Status != nil {
+		conditions = append(conditions, "status = ?")
+		args = append(args, *f.Status)
+	}
+	if len(conditions) > 0 {
+		query += " WHERE " + strings.Join(conditions, " AND ")
+	}
+	query += " ORDER BY idsatuan"
+
 	out := []Satuan{}
-	err := r.db.SelectContext(ctx, &out, selectSatuan)
+	err := r.db.SelectContext(ctx, &out, query, args...)
 	return out, err
 }
 

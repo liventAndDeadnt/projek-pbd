@@ -38,9 +38,15 @@ func Register(rg *gin.RouterGroup, db *sqlx.DB) {
 	v := rg.Group("/vendor")
 	v.GET("", vendor.List)
 	v.GET("/:id", vendor.Get)
+	v.POST("", adminOnly, vendor.Create)
+	v.PUT("/:id", adminOnly, vendor.Update)
+	v.DELETE("/:id", adminOnly, vendor.Delete)
 
 	margin := NewMarginHandler(NewMarginService(NewMarginRepository(db)))
 	m := rg.Group("/margin")
 	m.GET("", margin.List)
 	m.GET("/:id", margin.Get)
+	m.POST("", adminOnly, margin.Create)
+	m.PUT("/:id", adminOnly, margin.Update)
+	m.DELETE("/:id",  adminOnly, margin.Delete)
 }

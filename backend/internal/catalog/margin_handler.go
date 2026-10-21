@@ -6,7 +6,9 @@ import (
 
 	"github.com/gin-gonic/gin"
 
+	"projek-pbd/internal/platform/apperr"
 	"projek-pbd/internal/platform/httpx"
+	"projek-pbd/internal/platform/middleware"
 )
 
 type MarginHandler struct {
@@ -47,4 +49,54 @@ func (h *MarginHandler) Get(c *gin.Context) {
 		return
 	}
 	httpx.OK(c, data)
+}
+
+func (h *MarginHandler) Create(c *gin.Context) {
+	claims, ok := middleware.Claims(c)
+	if !ok {
+		httpx.Error(c, apperr.ErrUnauthorized)
+		return
+	}
+
+	var in MarginInput
+	if err := c.ShouldBindJSON(&in); err != nil {
+		httpx.Fail(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	data, err := h.svc.Create(c.Request.Context(), claims.UserID, in)
+	if err != nil {
+		httpx.Error(c, err)
+		return
+	}
+	httpx.Created(c, data)
+}
+
+func (h *MarginHandler) Update(c *gin.Context) {
+	id, ok := httpx.ParamInt(c, "id")
+	if !ok {
+		return
+	}
+	var in MarginInput
+	if err := c.ShouldBindJSON(&in); err != nil {
+		httpx.Fail(c, http.StatusBadRequest, err.Error())
+		return
+	}
+	data, err := h.svc.Update(c.Request.Context(), id, in)
+	if err != nil {
+		httpx.Error(c, err)
+		return
+	}
+	httpx.OK(c, data)
+}
+
+func (h *MarginHandler) Delete(c *gin.Context) {
+	id, ok := httpx.ParamInt(c, "id")
+	if !ok {
+		return
+	}
+	if err := h.svc.Delete(c.Request.Context(), id); err != nil {
+		httpx.Error(c, err)
+		return
+	}
+	httpx.OK(c, nil)
 }

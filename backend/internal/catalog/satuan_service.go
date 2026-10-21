@@ -16,8 +16,8 @@ func NewSatuanService(repo *SatuanRepository) *SatuanService {
 	return &SatuanService{repo: repo}
 }
 
-func (s *SatuanService) List(ctx context.Context) ([]Satuan, error) {
-	return s.repo.List(ctx)
+func (s *SatuanService) List(ctx context.Context, f SatuanFilter) ([]Satuan, error) {
+	return s.repo.List(ctx, f)
 }
 
 func (s *SatuanService) Get(ctx context.Context, id int) (*Satuan, error) {

@@ -8,3 +8,7 @@ type Role struct {
 type RoleFilter struct {
 	Search string
 }
+
+type RoleInput struct {
+	NamaRole string `json:"nama_role" binding:"required,max=100"`
+}

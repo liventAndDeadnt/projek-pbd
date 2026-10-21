@@ -12,3 +12,9 @@ type SatuanInput struct {
 	NamaSatuan string `json:"nama_satuan" binding:"required,max=45"`
 	Status     *int   `json:"status" binding:"omitempty,oneof=0 1"`
 }
+
+// SatuanFilter berisi filter opsional untuk daftar satuan.
+type SatuanFilter struct {
+	Search string
+	Status *int
+}

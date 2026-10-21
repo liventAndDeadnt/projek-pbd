@@ -15,6 +15,14 @@ type UserView struct {
 	Role     string `db:"nama_role" json:"role"`
 }
 
+// User adalah model internal untuk menulis akun. Password selalu berisi hash dan tidak dikirim ke client.
+type User struct {
+	IDUser   int    `db:"iduser" json:"iduser"`
+	Username string `db:"username" json:"username"`
+	IDRole   int    `db:"idrole" json:"idrole"`
+	Password string `db:"password" json:"-"`
+}
+
 // UserFilter berisi filter opsional untuk daftar pengguna.
 type UserFilter struct {
 	Search string
@@ -32,4 +40,17 @@ type userRecord struct {
 	Username string `db:"username"`
 	Password string `db:"password"`
 	NamaRole string `db:"nama_role"`
+}
+
+type UserCreateInput struct {
+	Username string `json:"username" binding:"required,max=45"`
+	IDRole   int    `json:"idrole" binding:"required,gt=0"`
+	Password string `json:"password" binding:"required,max=100"`
+}
+
+// Password boleh tidak dikirim ketika update agar perubahan nama/role tidak mereset password.
+type UserUpdateInput struct {
+	Username string  `json:"username" binding:"required,max=45"`
+	IDRole   int     `json:"idrole" binding:"required,gt=0"`
+	Password *string `json:"password" binding:"omitempty,max=100"`
 }
