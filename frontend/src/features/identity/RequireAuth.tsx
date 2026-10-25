@@ -1,9 +1,11 @@
+import type { ReactNode } from 'react'
 import { Navigate, Outlet, useLocation } from 'react-router-dom'
-import { useAuth } from './useAuth'
 import { ROLE_HOME, type Role } from '../dashboard/roles'
+import { useAuth } from './useAuth'
 
 // Pembungkus route yang wajib login. `roles` (opsional) membatasi ke role tertentu.
-export default function RequireAuth({ roles }: { roles?: string[] }) {
+// Bisa dipakai sebagai layout route (tanpa children) atau membungkus satu halaman.
+export default function RequireAuth({ roles, children }: { roles?: string[]; children?: ReactNode }) {
   const { user, loading } = useAuth()
   const location = useLocation()
 
@@ -17,9 +19,11 @@ export default function RequireAuth({ roles }: { roles?: string[] }) {
   if (!user) {
     return <Navigate to="/login" replace state={{ from: location.pathname }} />
   }
-  if (!(user.role in ROLE_HOME)) return <Navigate to="/login" replace />
+  if (!(user.role in ROLE_HOME)) {
+    return <Navigate to="/login" replace />
+  }
   if (roles && !roles.includes(user.role)) {
     return <Navigate to={ROLE_HOME[user.role as Role]} replace />
   }
-  return <Outlet />
+  return children ? <>{children}</> : <Outlet />
 }

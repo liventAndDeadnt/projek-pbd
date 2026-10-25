@@ -1,6 +1,8 @@
 # Frontend Inventori GOstore
 
-React 19, TypeScript, Vite, dan React Router. Login memakai sistem auth backend yang sudah ada. Modul procurement, receiving, retur, POS, inventory, dan reporting saat ini berupa UI simulasi; data simulasi tidak dikirim ke backend atau disimpan.
+React 19, TypeScript, Vite, dan React Router. Login memakai auth backend yang sudah ada.
+
+Tampilan memakai design system kecil berbasis CSS variable: sidebar terang, kartu putih, tipografi Inter, dan breakpoint responsif. Gaya lama `dashboard.css`, `login.css`, dan `index.css` sudah dihapus dan diganti oleh folder `src/styles/`.
 
 ## Menjalankan
 
@@ -11,24 +13,35 @@ npm run build     # hasil build ditulis ke ../backend/web/dist
 npm run lint
 ```
 
-Untuk login dan katalog barang/satuan, jalankan backend serta MySQL. Build hanya menghasilkan aset frontend ke `backend/web/dist`; backend saat ini belum memiliki route untuk menyajikan aset tersebut.
+Untuk login dan data master, jalankan backend serta MySQL. Build hanya menghasilkan aset frontend; backend belum menyajikan aset tersebut.
 
 ## Struktur
 
 ```text
 src/
-  App.tsx, main.tsx             router dan provider
-  shared/                       API helper dan komponen UI bersama
+  styles/                       token, base, shell, components, pages, responsive
+  shared/                       api, komponen UI, ikon SVG, format, hook media query
   features/
-    identity/                   login, sesi, route protection
-    dashboard/                  AppShell, role navigation, dashboard
-    catalog/                    barang dan satuan; memakai API yang sudah ada
-    mock/                       form daftar kosong dan metadata master data mock
+    identity/                   login, sesi, route protection, pengguna, role
+    dashboard/                  shell, navigasi role, dashboard
+    catalog/                    barang, satuan, vendor, margin
+    sales/                      POS, riwayat penjualan, margin aktif
     procurement/                daftar, detail, dan draft pengadaan
-    inventory/                  penerimaan dan kartu stok
-    returns/                    alur retur ke vendor
-    sales/                      POS dan konfigurasi margin simulasi
-    reporting/                  layar laporan kosong dan filter
+    inventory/                  penerimaan, stock, dan kartu stok
+    returns/                    retur ke vendor
+    reporting/                  laporan dan konfigurasi jenis laporan
 ```
 
-Data bisnis mock dimulai kosong. Input form boleh digunakan untuk mencoba validasi dan preview, tetapi setiap submit hanya memberi umpan balik simulasi. Katalog mempertahankan request baca yang sudah ada; form tambah/ubah/hapus katalog tidak memanggil API tulis.
+## Status integrasi
+
+- Login, logout, pemeriksaan sesi, serta CRUD barang, satuan, vendor, margin, pengguna, dan role memakai API nyata.
+- Dashboard mengambil jumlah dan daftar barang terbaru dari API master.
+- POS membaca katalog barang aktif dan margin aktif dari API; proses checkout masih pratinjau lokal dan belum menyimpan transaksi.
+- Pengadaan, penerimaan, retur, kartu stok, riwayat penjualan, dan laporan masih berupa UI. Data transaksi belum tersedia dari backend.
+
+## Catatan responsif
+
+- Sidebar berubah menjadi drawer di bawah 1024px, dengan overlay, tombol tutup, `Escape`, dan `inert` saat tertutup.
+- Grid statistik menjadi dua kolom di bawah 1180px dan satu kolom di bawah 520px.
+- Tabel memakai `overflow-x`; kolom sekunder memakai `hide-sm` dan disembunyikan di layar kecil agar kolom utama tetap terbaca.
+- Form dan ringkasan POS berubah menjadi satu kolom di layar kecil.

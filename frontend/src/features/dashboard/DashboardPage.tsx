@@ -1,46 +1,302 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { EmptyState, PageHeader, StatusBadge } from '../../shared/components'
+import { EmptyState, PageHeader, StatCard, StatusBadge } from '../../shared/components'
+import { formatDay, formatMoney, formatNumber } from '../../shared/format'
+import { Icon, type IconName } from '../../shared/icons'
+import { listBarang, listSatuan, listVendor } from '../catalog/catalog.api'
+import type { Barang } from '../catalog/catalog.types'
+import { listUsers } from '../identity/identity.api'
 import { useAuth } from '../identity/useAuth'
-import { formatMoney } from '../../shared/format'
-import { isRole, ROLE_LABEL } from './roles'
+import { useActiveMargin } from '../sales/useActiveMargin'
+import { isRole, ROLE_LABEL, type Role } from './roles'
 
-const intro = {
-  admin: ['Ikhtisar sistem', 'Pantau master data, transaksi, persediaan, dan laporan.'],
-  purchasing: ['Ruang kerja purchasing', 'Lihat prioritas permintaan dan alur pengadaan.'],
-  gudang: ['Operasional gudang', 'Pantau penerimaan, retur, dan pergerakan persediaan.'],
-  kasir: ['Aktivitas kasir', 'Mulai transaksi penjualan dan akses riwayat.'],
+type QuickLink = { label: string; hint: string; to: string; icon: IconName }
+
+const QUICK_LINKS: Record<Role, QuickLink[]> = {
+  admin: [
+    { label: 'Kelola barang', hint: 'Master data katalog', to: '/barang', icon: 'box' },
+    { label: 'Atur margin', hint: 'Persentase harga jual', to: '/margin', icon: 'percent' },
+    { label: 'Buka laporan', hint: 'Ringkasan penjualan', to: '/laporan/penjualan', icon: 'chart' },
+  ],
+  purchasing: [
+    { label: 'Buat pengadaan', hint: 'Mulai permintaan baru', to: '/pengadaan/baru', icon: 'plus' },
+    { label: 'Referensi vendor', hint: 'Daftar pemasok', to: '/vendor', icon: 'building' },
+    { label: 'Katalog barang', hint: 'Barang yang tersedia', to: '/barang', icon: 'box' },
+  ],
+  gudang: [
+    { label: 'Buat penerimaan', hint: 'Catat barang masuk', to: '/penerimaan/baru', icon: 'inbox' },
+    { label: 'Buat retur', hint: 'Kembalikan ke vendor', to: '/retur/baru', icon: 'rotate' },
+    { label: 'Kartu stok', hint: 'Riwayat pergerakan', to: '/kartu-stok', icon: 'package' },
+  ],
+  kasir: [
+    { label: 'Buka POS', hint: 'Mulai transaksi baru', to: '/pos', icon: 'cart' },
+    { label: 'Riwayat penjualan', hint: 'Transaksi sebelumnya', to: '/penjualan', icon: 'receipt' },
+    { label: 'Katalog barang', hint: 'Harga dan satuan', to: '/barang', icon: 'box' },
+  ],
+}
+
+const INTRO: Record<Role, string> = {
+  admin: 'Pantau master data, transaksi, persediaan, dan laporan dari satu tempat.',
+  purchasing: 'Kelola permintaan pengadaan dan pantau vendor yang bekerja sama.',
+  gudang: 'Pantau penerimaan, retur, dan pergerakan stok barang.',
+  kasir: 'Mulai transaksi penjualan dan akses riwayat dengan cepat.',
 }
 
 export default function DashboardPage() {
   const { user } = useAuth()
-  const role = user && isRole(user.role) ? user.role : 'admin'
-  return <div className="module-page dashboard-page">
-    <PageHeader eyebrow={`${ROLE_LABEL[role].toUpperCase()} · BERANDA`} title={intro[role][0]} description={`${intro[role][1]} Halo, ${user?.username ?? 'pengguna'}.`} />
-    
-    {role === 'admin' && <AdminDashboard />}
-    {role === 'purchasing' && <PurchasingDashboard />}
-    {role === 'gudang' && <WarehouseDashboard />}
-    {role === 'kasir' && <CashierDashboard />}
-  </div>
-}
+  const role: Role = user && isRole(user.role) ? user.role : 'admin'
+  const { percent: marginPercent, loading: marginLoading } = useActiveMargin()
+  const [barang, setBarang] = useState<Barang[]>([])
+  const [counts, setCounts] = useState({ satuan: 0, vendor: 0, users: 0 })
+  const [active, setActive] = useState({ barang: 0, satuan: 0, vendor: 0 })
+  const [loading, setLoading] = useState(true)
 
-function AdminDashboard() {
-  return <><div className="stat-grid stat-grid--four dashboard-stats"><Metric label="Penjualan hari ini" value={formatMoney(0)} /><Metric label="Pengadaan aktif" value="0" /><Metric label="Stok menipis" value="0" /><Metric label="Retur periode ini" value="0" /></div><div className="dashboard-lower"><section className="panel-card"><div className="panel-heading"><div><span className="panel-icon">⌁</span><div><h2>Ikhtisar operasional</h2><p>Ringkasan aktivitas operasional.</p></div></div></div><div className="overview-grid"><OverviewTile title="Penjualan" text="Belum ada ringkasan penjualan." /><OverviewTile title="Pengadaan" text="Belum ada progres pengadaan." /><OverviewTile title="Persediaan" text="Belum ada ringkasan stok." /><OverviewTile title="Retur" text="Belum ada ringkasan retur." /></div></section><section className="panel-card"><div className="panel-heading"><div><span className="panel-icon panel-icon--green">＋</span><div><h2>Akses cepat</h2><p>Menu administrasi utama</p></div></div></div><QuickLinks items={[["Tambah barang", "/barang"], ["Atur margin", "/margin"], ["Buka laporan", "/laporan/penjualan"]]} /></section></div><section className="panel-card dashboard-empty"><div className="panel-heading"><div><span className="panel-icon">◷</span><div><h2>Aktivitas terbaru</h2><p>Penjualan, pengadaan, penerimaan, dan retur</p></div></div><StatusBadge>Aktivitas</StatusBadge></div><EmptyState title="Belum ada aktivitas untuk ditampilkan." detail="Transaksi dan aktivitas operasional terbaru." /></section></>
-}
+  useEffect(() => {
+    let mounted = true
 
-function PurchasingDashboard() {
-  return <><div className="dashboard-action-banner"><div><span className="eyebrow">PRIORITAS PENGADAAN</span><h2>Siapkan permintaan baru</h2><p>Buat pengadaan dengan vendor dan beberapa item.</p></div><Link className="button button--primary" to="/pengadaan/baru">＋ Buat pengadaan</Link></div><div className="stat-grid stat-grid--four dashboard-stats"><Metric label="Menunggu" value="0" /><Metric label="Disetujui" value="0" /><Metric label="Dalam penerimaan" value="0" /><Metric label="Selesai" value="0" /></div><section className="panel-card dashboard-empty"><div className="panel-heading"><div><span className="panel-icon">⇧</span><div><h2>Antrean pengadaan</h2><p>Status dan progres permintaan</p></div></div><Link className="text-link" to="/pengadaan">Lihat semua →</Link></div><EmptyState title="Belum ada pengadaan yang perlu diproses." detail="Belum ada pengadaan untuk ditampilkan." /><div className="process-steps dashboard-process">{['Draft', 'Approval', 'Penerimaan', 'Selesai'].map((item, index) => <div className="process-step" key={item}><span>{`0${index + 1}`}</span><strong>{item}</strong></div>)}</div></section><div className="dashboard-lower"><ShortcutCard title="Referensi vendor" text="Master data vendor yang digunakan pada permintaan." to="/vendor" /><ShortcutCard title="Riwayat pengadaan" text="Daftar permintaan dan status approval." to="/pengadaan" /></div></>
-}
+    async function load() {
+      setLoading(true)
+      const [barangResult, satuanResult, vendorResult] = await Promise.allSettled([
+        listBarang('', ''),
+        listSatuan('', ''),
+        listVendor('', ''),
+      ])
 
-function WarehouseDashboard() {
-  return <><div className="stat-grid stat-grid--four dashboard-stats"><Metric label="Penerimaan dalam antrean" value="0" /><Metric label="Penerimaan parsial" value="0" /><Metric label="Retur menunggu" value="0" /><Metric label="Barang stok rendah" value="0" /></div><div className="dashboard-lower"><section className="panel-card"><div className="panel-heading"><div><span className="panel-icon">↧</span><div><h2>Antrean penerimaan</h2><p>PO dapat diterima dalam beberapa batch.</p></div></div><Link className="text-link" to="/penerimaan">Buka antrean →</Link></div><EmptyState title="Tidak ada penerimaan dalam antrean." detail="Saat tersedia, setiap baris menampilkan jumlah dipesan, diterima, dan sisa." /></section><section className="panel-card"><div className="panel-heading"><div><span className="panel-icon panel-icon--green">▦</span><div><h2>Ringkasan stok</h2><p>Ledger baca-saja</p></div></div></div><EmptyState title="Belum ada data stok." detail="Ringkasan pergerakan stok barang." /><div className="panel-action"><Link className="button button--secondary button--small" to="/kartu-stok">Buka kartu stok</Link></div></section></div><section className="panel-card dashboard-empty"><div className="panel-heading"><div><span className="panel-icon">↶</span><div><h2>Retur ke vendor</h2><p>Retur terkait barang yang pernah diterima</p></div></div><Link className="text-link" to="/retur">Lihat retur →</Link></div><EmptyState title="Belum ada retur yang perlu ditangani." detail="Belum ada retur untuk ditampilkan." /></section></>
-}
+      if (!mounted) return
 
-function CashierDashboard() {
-  return <><div className="pos-hero"><div><span className="eyebrow">KASIR</span><h2>Siap melayani penjualan?</h2><p>Buka POS untuk memulai transaksi penjualan.</p></div><Link className="button button--primary pos-hero-cta" to="/pos">Buka POS <span>→</span></Link></div><div className="stat-grid stat-grid--three dashboard-stats"><Metric label="Penjualan hari ini" value={formatMoney(0)} /><Metric label="Transaksi hari ini" value="0" /><Metric label="Rata-rata transaksi" value={formatMoney(0)} /></div><section className="panel-card dashboard-empty"><div className="panel-heading"><div><span className="panel-icon">◷</span><div><h2>Transaksi terbaru</h2><p>Riwayat transaksi kasir aktif</p></div></div><Link className="text-link" to="/penjualan">Riwayat penjualan →</Link></div><EmptyState title="Belum ada transaksi hari ini." detail="Ringkasan penjualan dan pembayaran." /></section><div className="dashboard-lower"><ShortcutCard title="Katalog barang" text="Referensi barang tersedia pada modul katalog." to="/barang" /><section className="panel-card cashier-note"><div className="panel-heading"><div><span className="panel-icon">i</span><div><h2>Harga jual</h2><p>Margin penjualan</p></div></div></div><div className="cashier-margin"><strong>10%</strong><span>Margin yang digunakan untuk menghitung harga jual.</span></div></section></div></>
-}
+      const barangRows = barangResult.status === 'fulfilled' ? barangResult.value : []
+      const satuanRows = satuanResult.status === 'fulfilled' ? satuanResult.value : []
+      const vendorRows = vendorResult.status === 'fulfilled' ? vendorResult.value : []
 
-function Metric({ label, value }: { label: string; value: string }) { return <article className="stat-card metric-card"><span className="stat-label">{label}</span><strong className="stat-value">{value}</strong><span className="stat-note">Belum ada data</span></article> }
-function OverviewTile({ title, text }: { title: string; text: string }) { return <div className="overview-tile"><strong>{title}</strong><p>{text}</p></div> }
-function QuickLinks({ items }: { items: [string, string][] }) { return <div className="workflow-list">{items.map(([label, to]) => <Link className="workflow-row" to={to} key={label}><span className="row-mark">↗</span><span className="workflow-text"><strong>{label}</strong><small>Buka halaman</small></span><span className="row-arrow">→</span></Link>)}</div> }
-function ShortcutCard({ title, text, to }: { title: string; text: string; to: string }) { return <section className="panel-card shortcut-card"><div><span className="panel-icon panel-icon--green">↗</span><h2>{title}</h2><p>{text}</p></div><Link className="text-link" to={to}>Buka halaman →</Link></section> }
+      setBarang(barangRows)
+      setCounts({
+        satuan: satuanRows.length,
+        vendor: vendorRows.length,
+        users: 0,
+      })
+      setActive({
+        barang: barangRows.filter((row) => row.status === 1).length,
+        satuan: satuanRows.filter((row) => row.status === 1).length,
+        vendor: vendorRows.filter((row) => row.status === '1').length,
+      })
+
+      if (role === 'admin') {
+        const usersResult = await listUsers('', '')
+          .then((rows) => rows.length)
+          .catch(() => 0)
+        if (mounted) setCounts((current) => ({ ...current, users: usersResult }))
+      }
+
+      if (mounted) setLoading(false)
+    }
+
+    void load()
+    return () => {
+      mounted = false
+    }
+  }, [role])
+
+  const latest = [...barang].sort((a, b) => b.idbarang - a.idbarang).slice(0, 5)
+  const action =
+    role === 'admin'
+      ? { label: 'Buka katalog', to: '/barang', icon: 'box' as IconName }
+      : role === 'purchasing'
+        ? { label: 'Buat pengadaan', to: '/pengadaan/baru', icon: 'plus' as IconName }
+        : role === 'gudang'
+          ? { label: 'Buat penerimaan', to: '/penerimaan/baru', icon: 'inbox' as IconName }
+          : { label: 'Buka POS', to: '/pos', icon: 'cart' as IconName }
+
+  const stats =
+    role === 'admin'
+      ? [
+          { label: 'Barang', value: barang.length, note: `${active.barang} aktif`, icon: 'box' as IconName },
+          { label: 'Satuan', value: counts.satuan, note: `${active.satuan} aktif`, icon: 'layers' as IconName },
+          { label: 'Vendor', value: counts.vendor, note: `${active.vendor} aktif`, icon: 'building' as IconName },
+          { label: 'Pengguna', value: counts.users, note: 'Akun internal', icon: 'users' as IconName },
+        ]
+      : role === 'purchasing'
+        ? [
+            { label: 'Barang', value: barang.length, note: `${active.barang} aktif`, icon: 'box' as IconName },
+            { label: 'Satuan', value: counts.satuan, note: `${active.satuan} aktif`, icon: 'layers' as IconName },
+            { label: 'Vendor', value: counts.vendor, note: `${active.vendor} aktif`, icon: 'building' as IconName },
+            { label: 'Pengadaan', value: 0, note: 'Belum tersedia', icon: 'clipboard' as IconName },
+          ]
+        : role === 'gudang'
+          ? [
+              { label: 'Barang', value: barang.length, note: `${active.barang} aktif`, icon: 'box' as IconName },
+              { label: 'Satuan', value: counts.satuan, note: `${active.satuan} aktif`, icon: 'layers' as IconName },
+              { label: 'Stok', value: 0, note: 'Belum tersedia', icon: 'package' as IconName },
+              { label: 'Penerimaan', value: 0, note: 'Belum tersedia', icon: 'inbox' as IconName },
+            ]
+          : [
+              { label: 'Barang', value: barang.length, note: `${active.barang} aktif`, icon: 'box' as IconName },
+              {
+                label: 'Margin aktif',
+                value: `${formatNumber(marginPercent)}%`,
+                note: 'Harga jual',
+                icon: 'percent' as IconName,
+              },
+              { label: 'Penjualan hari ini', value: 0, note: 'Belum tersedia', icon: 'cart' as IconName },
+              { label: 'Transaksi', value: 0, note: 'Belum tersedia', icon: 'receipt' as IconName },
+            ]
+
+  return (
+    <div className="page-stack">
+      <PageHeader
+        eyebrow={`${ROLE_LABEL[role]} · beranda`}
+        title={`Selamat datang, ${user?.username ?? 'pengguna'}`}
+        description={INTRO[role]}
+        action={
+          <>
+            <span className="date-chip">
+              <Icon name="calendar" size={14} />
+              {formatDay()}
+            </span>
+            <Link className="btn btn--primary" to={action.to}>
+              <Icon name={action.icon} size={15} />
+              {action.label}
+            </Link>
+          </>
+        }
+      />
+
+      <section className="stat-grid" aria-label="Ringkasan data">
+        {stats.map((stat) => (
+          <StatCard
+            key={stat.label}
+            label={stat.label}
+            value={stat.value}
+            note={stat.note}
+            icon={stat.icon}
+            loading={loading || (stat.label === 'Margin aktif' && marginLoading)}
+          />
+        ))}
+      </section>
+
+      <div className="dashboard-grid">
+        <section className="card">
+          <div className="card-head">
+            <div>
+              <h2>Barang terbaru</h2>
+              <p>Lima barang terakhir yang tercatat di katalog.</p>
+            </div>
+            <Link className="card-link" to="/barang">
+              Lihat semua
+              <Icon name="arrowRight" size={13} />
+            </Link>
+          </div>
+
+          {loading ? (
+            <div className="table-state" role="status">
+              <span className="spinner" />
+              Memuat data…
+            </div>
+          ) : latest.length === 0 ? (
+            <EmptyState
+              icon="box"
+              title="Belum ada barang."
+              detail="Tambahkan barang melalui halaman katalog untuk melihat ringkasannya di sini."
+              action={
+                role === 'admin' ? (
+                  <Link className="btn btn--secondary btn--sm" to="/barang">
+                    Buka katalog
+                  </Link>
+                ) : undefined
+              }
+            />
+          ) : (
+            <>
+              <div className="table-wrap">
+                <table className="table">
+                  <thead>
+                    <tr>
+                      <th>Barang</th>
+                      <th className="hide-sm">Jenis</th>
+                      <th className="hide-sm">Satuan</th>
+                      <th className="num">Harga dasar</th>
+                      <th>Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {latest.map((item) => (
+                      <tr key={item.idbarang}>
+                        <td>
+                          <div className="cell">
+                            <span className="cell-icon">
+                              <Icon name="box" size={15} />
+                            </span>
+                            <span className="cell-copy">
+                              <strong>{item.nama}</strong>
+                              <small>ID #{item.idbarang}</small>
+                            </span>
+                          </div>
+                        </td>
+                        <td className="hide-sm">{item.jenis}</td>
+                        <td className="hide-sm">{item.nama_satuan}</td>
+                        <td className="num">{formatMoney(item.harga)}</td>
+                        <td>
+                          <StatusBadge tone={item.status ? 'green' : 'neutral'}>
+                            {item.status ? 'Aktif' : 'Nonaktif'}
+                          </StatusBadge>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+              <div className="table-footer">
+                <span>Menampilkan {latest.length} dari {barang.length} barang</span>
+                <Link className="card-link" to="/barang">
+                  Kelola katalog
+                  <Icon name="arrowRight" size={12} />
+                </Link>
+              </div>
+            </>
+          )}
+        </section>
+
+        <section className="card">
+          <div className="card-head">
+            <div>
+              <h2>Akses cepat</h2>
+              <p>Menu yang paling sering dipakai untuk peranmu.</p>
+            </div>
+          </div>
+          <div className="quick-list">
+            {QUICK_LINKS[role].map((item) => (
+              <Link className="quick-link" to={item.to} key={item.to}>
+                <span className="quick-icon">
+                  <Icon name={item.icon} size={15} />
+                </span>
+                <span className="quick-copy">
+                  <strong>{item.label}</strong>
+                  <span>{item.hint}</span>
+                </span>
+                <span className="quick-arrow">
+                  <Icon name="chevronRight" size={14} />
+                </span>
+              </Link>
+            ))}
+          </div>
+        </section>
+      </div>
+
+      <section className="card activity-card">
+        <div className="card-head">
+          <div>
+            <h2>Aktivitas terbaru</h2>
+            <p>Penjualan, pengadaan, penerimaan, dan retur akan tampil di sini.</p>
+          </div>
+          <StatusBadge tone="neutral">Segera hadir</StatusBadge>
+        </div>
+        <div className="card-body">
+          <EmptyState
+            icon="clock"
+            title="Belum ada aktivitas."
+            detail="Data transaksi akan muncul setelah modul pengadaan, penerimaan, retur, dan penjualan terhubung ke basis data."
+          />
+        </div>
+      </section>
+    </div>
+  )
+}

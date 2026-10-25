@@ -1,2 +1,2 @@
-// Persentase margin yang digunakan untuk menghitung harga jual.
-export const ACTIVE_MARGIN_PERCENT = 10
+// Nilai cadangan jika margin aktif belum bisa dibaca dari API.
+export const DEFAULT_MARGIN_PERCENT = 10

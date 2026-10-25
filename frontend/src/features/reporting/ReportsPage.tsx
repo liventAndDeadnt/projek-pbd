@@ -1,17 +1,128 @@
 import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
-import { EmptyState, Field, PageHeader, Toast } from '../../shared/components'
-import { reports } from '../mock/resources'
+import { EmptyState, Field, PageHeader, StatCard, Toast } from '../../shared/components'
+import { Icon } from '../../shared/icons'
+import { REPORTS } from './reports'
 
 export default function ReportsPage() {
   const { report: routeReport } = useParams()
-  const active = reports.some((item) => item.key === routeReport) ? routeReport! : reports[0]!.key
+  const active = REPORTS.some((item) => item.key === routeReport) ? routeReport! : REPORTS[0]!.key
+  const report = REPORTS.find((item) => item.key === active) ?? REPORTS[0]!
+  const [from, setFrom] = useState('')
+  const [to, setTo] = useState('')
+  const [status, setStatus] = useState('')
   const [toast, setToast] = useState('')
-  const report = reports.find((item) => item.key === active) ?? reports[0]!
-  return <div className="module-page"><PageHeader eyebrow="PELAPORAN" title={`Laporan ${report.label.toLowerCase()}`} description="Pilih filter untuk melihat data laporan." action={<button className="button button--secondary" onClick={() => setToast('Laporan siap diekspor.')}>⇩ Ekspor / cetak</button>} />
-    <div className="page-tabs report-tabs" role="tablist" aria-label="Jenis laporan">{reports.map((item) => <Link key={item.key} role="tab" aria-selected={active === item.key} className={active === item.key ? 'page-tab page-tab--active' : 'page-tab'} to={`/laporan/${item.key}`}>{item.label}</Link>)}</div>
-    <section className="panel-card report-filters"><Field label="Dari tanggal"><input type="date" /></Field><Field label="Sampai tanggal"><input type="date" /></Field>{active !== 'stok' && <Field label="Status"><select><option>Semua status</option><option>Aktif</option><option>Selesai</option></select></Field>}<button className="button button--primary" onClick={() => setToast('Filter laporan diterapkan.')}>Terapkan filter</button></section>
-    <div className="stat-grid report-summary"><article className="stat-card"><span className="stat-label">Jumlah baris</span><strong className="stat-value">0</strong><span className="stat-note">Belum ada data untuk rentang ini</span></article><article className="stat-card"><span className="stat-label">Total nilai</span><strong className="stat-value">Rp 0</strong><span className="stat-note">Data laporan belum tersedia</span></article><article className="stat-card"><span className="stat-label">Periode laporan</span><strong className="stat-value report-period">Pilih tanggal</strong><span className="stat-note">Filter tanggal di atas</span></article></div>
-    <section className="panel-card resource-panel"><div className="table-toolbar"><div><h2>Rincian laporan {report.label.toLowerCase()}</h2><p>Ringkasan dan rincian laporan.</p></div><button className="button button--secondary button--small" onClick={() => setToast('Laporan siap dicetak.')}>Cetak</button></div><div className="table-scroll"><table className="data-table"><thead><tr>{report.columns.map((column) => <th key={column}>{column}</th>)}</tr></thead><tbody /></table></div><EmptyState title="Belum ada data laporan." detail="Belum ada data laporan untuk ditampilkan." /></section>
-    {toast && <Toast message={toast} onClose={() => setToast('')} />}</div>
+
+  return (
+    <div className="page-stack">
+      <PageHeader
+        eyebrow="Pelaporan"
+        title={`Laporan ${report.label.toLowerCase()}`}
+        description={report.description}
+        action={
+          <button
+            className="btn btn--secondary"
+            type="button"
+            onClick={() => setToast('Data laporan belum tersedia untuk diekspor.')}
+          >
+            <Icon name="chart" size={15} />
+            Ekspor / cetak
+          </button>
+        }
+      />
+
+      <div className="tabs report-tabs" role="tablist" aria-label="Jenis laporan">
+        {REPORTS.map((item) => (
+          <Link
+            key={item.key}
+            role="tab"
+            aria-selected={active === item.key}
+            className={`tab${active === item.key ? ' is-active' : ''}`}
+            to={`/laporan/${item.key}`}
+          >
+            {item.label}
+          </Link>
+        ))}
+      </div>
+
+      <section className="card">
+        <div className="card-head">
+          <div>
+            <h2>Filter laporan</h2>
+            <p>Pilih rentang tanggal dan status data.</p>
+          </div>
+        </div>
+        <div className="report-filters">
+          <Field label="Dari tanggal">
+            <input type="date" value={from} onChange={(event) => setFrom(event.target.value)} />
+          </Field>
+          <Field label="Sampai tanggal">
+            <input type="date" value={to} onChange={(event) => setTo(event.target.value)} />
+          </Field>
+          {active !== 'stok' && (
+            <Field label="Status">
+              <select value={status} onChange={(event) => setStatus(event.target.value)}>
+                <option value="">Semua status</option>
+                <option value="aktif">Aktif</option>
+                <option value="selesai">Selesai</option>
+              </select>
+            </Field>
+          )}
+          <button
+            className="btn btn--primary"
+            type="button"
+            onClick={() => setToast('Filter laporan diterapkan pada tampilan.')}
+          >
+            Terapkan filter
+          </button>
+        </div>
+      </section>
+
+      <section className="stat-grid report-summary" aria-label="Ringkasan laporan">
+        <StatCard label="Jumlah baris" value={0} note="Belum ada data" icon="layers" />
+        <StatCard label="Total nilai" value="Rp 0" note="Belum ada data" icon="chart" />
+        <StatCard
+          label="Periode laporan"
+          value={from || to ? `${from || '…'} — ${to || '…'}` : 'Pilih tanggal'}
+          note="Filter tanggal di atas"
+          icon="calendar"
+        />
+      </section>
+
+      <section className="card">
+        <div className="card-head">
+          <div>
+            <h2>Rincian laporan {report.label.toLowerCase()}</h2>
+            <p>Ringkasan dan rincian data laporan.</p>
+          </div>
+          <button
+            className="btn btn--secondary btn--sm"
+            type="button"
+            onClick={() => setToast('Laporan belum tersedia untuk dicetak.')}
+          >
+            Cetak
+          </button>
+        </div>
+        <div className="table-wrap">
+          <table className="table">
+            <thead>
+              <tr>
+                {report.columns.map((column) => (
+                  <th key={column}>{column}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody />
+          </table>
+        </div>
+        <EmptyState
+          icon="chart"
+          title="Belum ada data laporan."
+          detail="Laporan akan tampil setelah modul transaksi dan view laporan tersedia."
+        />
+      </section>
+
+      {toast && <Toast message={toast} onClose={() => setToast('')} />}
+    </div>
+  )
 }
