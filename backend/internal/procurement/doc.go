@@ -1,3 +1,3 @@
-// Package procurement: vendor, pengadaan, penerimaan, retur (+ tabel detail).
-// TODO: belum dikerjakan.
+// Package procurement: pengadaan, penerimaan, retur (+ tabel detail).
+// Pengadaan dan penerimaan sudah terhubung; retur menyusul.
 package procurement

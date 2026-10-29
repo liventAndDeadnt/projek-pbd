@@ -39,9 +39,11 @@ func Load() Config {
 // DSN membentuk connection string MySQL.
 // clientFoundRows=true: RowsAffected() menghitung baris yang COCOK (bukan hanya yang berubah),
 // jadi UPDATE dengan nilai sama tidak salah terbaca "data tidak ditemukan".
+// parseTime=true + loc=Local: TIMESTAMP dibaca sebagai waktu lokal server, bukan UTC,
+// supaya tanggal di UI tidak bergeser saat dikonversi browser.
 func (c Config) DSN() string {
 	return fmt.Sprintf(
-		"%s:%s@tcp(%s:%s)/%s?parseTime=true&clientFoundRows=true&charset=utf8mb4",
+		"%s:%s@tcp(%s:%s)/%s?parseTime=true&loc=Local&clientFoundRows=true&charset=utf8mb4",
 		c.DBUser, c.DBPass, c.DBHost, c.DBPort, c.DBName,
 	)
 }

@@ -54,3 +54,13 @@ func ParamInt(c *gin.Context, name string) (int, bool) {
 	}
 	return v, true
 }
+
+// ParamInt64 dipakai untuk primary key BIGINT seperti idpengadaan.
+func ParamInt64(c *gin.Context, name string) (int64, bool) {
+	v, err := strconv.ParseInt(c.Param(name), 10, 64)
+	if err != nil || v <= 0 {
+		Fail(c, http.StatusBadRequest, "Parameter "+name+" tidak valid.")
+		return 0, false
+	}
+	return v, true
+}

@@ -19,6 +19,7 @@ import (
 	"projek-pbd/internal/platform/config"
 	"projek-pbd/internal/platform/database"
 	"projek-pbd/internal/platform/middleware"
+	"projek-pbd/internal/procurement"
 )
 
 func main() {
@@ -51,7 +52,8 @@ func main() {
 
 	identity.Register(api, protected, db, jwtManager, cfg.CookieSecure)
 	catalog.Register(protected, db)
-	// TODO: procurement.Register(protected, db), sales.Register(protected, db), ...
+	procurement.Register(protected, db)
+	// TODO: sales.Register(protected, db), inventory.Register(protected, db), ...
 
 	srv := &http.Server{Addr: ":" + cfg.Port, Handler: r}
 

@@ -1,9 +1,11 @@
 # secrets
 .env
+.opencode
 
 # go
 *.exe
 .gocache/
+backend/.gotmp/
 backend/web/dist/*
 !backend/web/dist/.gitkeep
 

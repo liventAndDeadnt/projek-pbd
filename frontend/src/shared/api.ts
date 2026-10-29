@@ -8,6 +8,13 @@ export class ApiError extends Error {
   }
 }
 
+// Pesan siap tampil untuk error API maupun kegagalan koneksi.
+export function errorMessage(error: unknown): string {
+  return error instanceof ApiError
+    ? error.message
+    : 'Tidak bisa terhubung ke server. Periksa koneksi lalu coba lagi.'
+}
+
 // Bentuk response sistem: { success, data } atau { success: false, message }
 type Envelope<T> = { success: boolean; data?: T; message?: string }
 

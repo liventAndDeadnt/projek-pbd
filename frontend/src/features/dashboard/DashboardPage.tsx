@@ -5,6 +5,10 @@ import { formatDay, formatMoney, formatNumber } from '../../shared/format'
 import { Icon, type IconName } from '../../shared/icons'
 import { listBarang, listSatuan, listVendor } from '../catalog/catalog.api'
 import type { Barang } from '../catalog/catalog.types'
+import { listPengadaan } from '../procurement/procurement.api'
+import type { Pengadaan } from '../procurement/procurement.types'
+import { listPenerimaan } from '../inventory/penerimaan.api'
+import type { Penerimaan } from '../inventory/penerimaan.types'
 import { listUsers } from '../identity/identity.api'
 import { useAuth } from '../identity/useAuth'
 import { useActiveMargin } from '../sales/useActiveMargin'
@@ -47,6 +51,8 @@ export default function DashboardPage() {
   const role: Role = user && isRole(user.role) ? user.role : 'admin'
   const { percent: marginPercent, loading: marginLoading } = useActiveMargin()
   const [barang, setBarang] = useState<Barang[]>([])
+  const [pengadaanRows, setPengadaanRows] = useState<Pengadaan[]>([])
+  const [penerimaanRows, setPenerimaanRows] = useState<Penerimaan[]>([])
   const [counts, setCounts] = useState({ satuan: 0, vendor: 0, users: 0 })
   const [active, setActive] = useState({ barang: 0, satuan: 0, vendor: 0 })
   const [loading, setLoading] = useState(true)
@@ -56,19 +62,23 @@ export default function DashboardPage() {
 
     async function load() {
       setLoading(true)
-      const [barangResult, satuanResult, vendorResult] = await Promise.allSettled([
-        listBarang('', ''),
-        listSatuan('', ''),
-        listVendor('', ''),
-      ])
+      const [barangResult, satuanResult, vendorResult, pengadaanResult] =
+        await Promise.allSettled([
+          listBarang('', ''),
+          listSatuan('', ''),
+          listVendor('', ''),
+          role === 'purchasing' ? listPengadaan('', '') : Promise.resolve([]),
+        ])
 
       if (!mounted) return
 
       const barangRows = barangResult.status === 'fulfilled' ? barangResult.value : []
       const satuanRows = satuanResult.status === 'fulfilled' ? satuanResult.value : []
       const vendorRows = vendorResult.status === 'fulfilled' ? vendorResult.value : []
+      const pengadaanData = pengadaanResult.status === 'fulfilled' ? pengadaanResult.value : []
 
       setBarang(barangRows)
+      setPengadaanRows(pengadaanData)
       setCounts({
         satuan: satuanRows.length,
         vendor: vendorRows.length,
@@ -85,6 +95,11 @@ export default function DashboardPage() {
           .then((rows) => rows.length)
           .catch(() => 0)
         if (mounted) setCounts((current) => ({ ...current, users: usersResult }))
+      }
+
+      if (role === 'gudang') {
+        const rows = await listPenerimaan('', '').catch(() => [])
+        if (mounted) setPenerimaanRows(rows)
       }
 
       if (mounted) setLoading(false)
@@ -119,14 +134,24 @@ export default function DashboardPage() {
             { label: 'Barang', value: barang.length, note: `${active.barang} aktif`, icon: 'box' as IconName },
             { label: 'Satuan', value: counts.satuan, note: `${active.satuan} aktif`, icon: 'layers' as IconName },
             { label: 'Vendor', value: counts.vendor, note: `${active.vendor} aktif`, icon: 'building' as IconName },
-            { label: 'Pengadaan', value: 0, note: 'Belum tersedia', icon: 'clipboard' as IconName },
+            {
+              label: 'Pengadaan',
+              value: pengadaanRows.length,
+              note: `${pengadaanRows.filter((row) => row.status === 'P').length} pending`,
+              icon: 'clipboard' as IconName,
+            },
           ]
         : role === 'gudang'
           ? [
               { label: 'Barang', value: barang.length, note: `${active.barang} aktif`, icon: 'box' as IconName },
               { label: 'Satuan', value: counts.satuan, note: `${active.satuan} aktif`, icon: 'layers' as IconName },
               { label: 'Stok', value: 0, note: 'Belum tersedia', icon: 'package' as IconName },
-              { label: 'Penerimaan', value: 0, note: 'Belum tersedia', icon: 'inbox' as IconName },
+              {
+                label: 'Penerimaan',
+                value: penerimaanRows.length,
+                note: `${penerimaanRows.filter((row) => row.status === 'S').length} partial`,
+                icon: 'inbox' as IconName,
+              },
             ]
           : [
               { label: 'Barang', value: barang.length, note: `${active.barang} aktif`, icon: 'box' as IconName },

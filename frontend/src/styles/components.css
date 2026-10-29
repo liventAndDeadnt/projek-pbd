@@ -433,6 +433,31 @@
   font-variant-numeric: tabular-nums;
 }
 
+.table-input {
+  width: 100%;
+  max-width: 112px;
+  min-height: 34px;
+  padding: 6px 8px;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  font: inherit;
+  text-align: right;
+}
+
+.table-input:focus {
+  outline: 0;
+  border-color: var(--text-3);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.table-input:disabled {
+  color: var(--text-4);
+  background: var(--surface-2);
+  cursor: not-allowed;
+}
+
 .cell {
   display: flex;
   min-width: 0;
@@ -674,6 +699,66 @@
   border: 1px solid var(--danger-border);
   border-radius: 7px;
   font-size: 11.5px;
+}
+
+.lookup {
+  position: relative;
+}
+
+.lookup-list {
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 4px);
+  right: 0;
+  left: 0;
+  max-height: 214px;
+  padding: 4px;
+  margin: 0;
+  overflow-y: auto;
+  list-style: none;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 7px;
+  box-shadow: var(--shadow-md);
+}
+
+.lookup-list button {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 2px;
+  padding: 8px 9px;
+  color: var(--text-2);
+  text-align: left;
+  background: transparent;
+  border: 0;
+  border-radius: 5px;
+}
+
+.lookup-list button:hover,
+.lookup-list button:focus-visible {
+  color: var(--text);
+  background: var(--surface-2);
+  outline: 0;
+}
+
+.lookup-list strong {
+  overflow: hidden;
+  font-size: 11.5px;
+  font-weight: 600;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.lookup-list small {
+  color: var(--text-4);
+  font-size: 10px;
+}
+
+.lookup-list--state {
+  padding: 10px;
+  color: var(--text-4);
+  font-size: 10.5px;
 }
 
 .form-grid {
